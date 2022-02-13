@@ -1,5 +1,6 @@
-import { IBlock } from '../block';
-import { hash, hashValidation } from '../helper/helpers';
+import { IBlock } from '../../block';
+import { hash } from '../../helper/helpers';
+import { verifyBlock, hashValidation } from './validation';
 
 class Blockchain {
   #chain: IBlock[] = [];
@@ -83,29 +84,12 @@ class Blockchain {
 
   }
 
-
-  verifyBlock(block: IBlock): boolean {
-    if (block.payload.previousHash !== this.lastBlockHash()) {
-      console.error(`Block ${block.payload.sequence} invalid:
-        previous hash is ${this.lastBlockHash().slice(0, 12)} isn't ${block.payload.previousHash.slice(0, 12)}
-      `);
-      return false;
-    }
-
-    const hashPow = hash(hash(JSON.stringify(block.payload)) + block.header.nonce);
-
-    if (!hashValidation({hash: hashPow, difficulty: this.difficulty, prefix: this.prefixPow})) {
-      console.error(`Block ${block.payload.sequence} invalid:
-        Nonce ${block.header.nonce} is invalid. It can't be verified
-      `);
-      return false;
-    }
-
-    return true;
-  }
-
   sendBlock(block: IBlock): IBlock[] {
-    if(this.verifyBlock(block)) {
+    if(verifyBlock(
+      block,
+      this.lastBlockHash(),
+      {prefixPow: this.prefixPow, difficulty: this.difficulty}
+    )) {
       this.#chain.push(block);
 
       console.log(`Block #${block.payload.sequence} has been added on blockchain: ${JSON.stringify(block, null, 2)}`)

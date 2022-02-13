@@ -1,4 +1,4 @@
-import {Blockchain} from './domain/useCase/blockchain';
+import {Blockchain} from './domain/useCase/blockchain/Blockchain';
 
 const difficulty = Number(process.argv[2]) || 4;
 
